@@ -1,0 +1,31 @@
+//int a = callout f(1 != 2, +2);
+int b = true;
+function int main(int x)
+{
+    //int a[][] = {1,2,3};
+    char c;
+    //input(c);
+    while(1 && 2)
+    {
+        input(c);
+    }
+    //return 1;
+    //int a;
+    //int c = 2*3;
+    //c + d;
+    //2*3 + 5 + c + d + 5%4 + 3/5 + 6/4 + 6*4/5%5;
+    //i = j;
+    //a[i][j] = b[i][i];
+    //callout f(a[i][j] + 'a');
+    //for(i=1; i<n; i = 2 + 3*7)
+      //i = i + 1;
+     
+    //input(s[1 + 2*6%6 + (4 + 3)]);
+    //print(a,b,1+2);
+    //print("Shikhar", "Shasya", a);
+    //a++;
+    //while(i<(j+1))
+    	//a = ++a;
+    	//continue;
+    // return;
+}
