@@ -1,14 +1,17 @@
 //int a = callout f(1 != 2, +2);
-int b = true;
-function int main(int x)
-{
+//int b = true;
+int b;
+//function int main(int x)
+//{
     //int a[][] = {1,2,3};
-    char c;
+    //char c;
+    //int a[][] = {2+3,2};
+    //23;
     //input(c);
-    while(1 && 2)
-    {
-        input(c);
-    }
+    //while(1 && 2)
+    //{
+    //    input(c);
+    //}
     //return 1;
     //int a;
     //int c = 2*3;
@@ -28,4 +31,4 @@ function int main(int x)
     	//a = ++a;
     	//continue;
     // return;
-}
+  //}

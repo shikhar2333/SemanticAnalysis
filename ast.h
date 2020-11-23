@@ -14,6 +14,7 @@ class ASTExprTernary;
 class ASTExprID;
 class ASTExprINT;
 
+class ASTRoot;
 class ASTFuncDec;
 class ASTListFuncDec;
 class ASTDeclStatement;
@@ -27,8 +28,6 @@ class ASTReturn;
 class ASTIf;
 class ASTElse;
 class ASTBlockOrStatement;
-class ASTIfBlock;
-class ASTSingleStat;
 class ASTFor;
 class ASTCond;
 class ASTParanCond;
@@ -73,6 +72,7 @@ class ASTvisitor
 {
 public:
     virtual void visit(ASTProg &node) = 0;
+    virtual void visit(ASTRoot &node) = 0;
     virtual void visit(ASTStatExpr &node) = 0;
     virtual void visit(ASTStatAssignExpr &node) = 0;
     virtual void visit(ASTFuncDec & node) = 0;
@@ -88,8 +88,6 @@ public:
     virtual void visit(ASTIf & node) = 0;
     virtual void visit(ASTElse & node) = 0;
     virtual void visit(ASTBlockOrStatement & node) = 0;
-    virtual void visit(ASTIfBlock & node) = 0;
-    virtual void visit(ASTSingleStat & node) = 0;
     virtual void visit(ASTFor & node) = 0;
     virtual void visit(ASTCond & node) = 0;
     virtual void visit(ASTNotCond & node) = 0;
@@ -182,18 +180,6 @@ class ASTBlock : public ASTnode
 {
     public:
         std::vector<ASTStat* > statementList;
-        virtual void accept(ASTvisitor &v)
-        {
-            v.visit(*this);
-        }
-};
-class ASTListFuncDec : public ASTnode
-{
-    public:
-        std::string datatype;
-        std::string funcname;
-        ASTListArgs* params_list;
-        ASTBlock* block;
         virtual void accept(ASTvisitor &v)
         {
             v.visit(*this);
@@ -298,6 +284,16 @@ class ASTReturn : public ASTStat
             v.visit(*this);
         }
 };
+class ASTBlockOrStatement : public ASTnode
+{
+    public:
+        ASTBlock* block;
+        ASTStat* statement;
+        virtual void accept(ASTvisitor &v)
+        {
+            v.visit(*this);
+        }
+};
 class ASTIf : public ASTStat
 {
     public:
@@ -313,32 +309,6 @@ class ASTElse : public ASTnode
 {
     public:
         ASTBlockOrStatement* blockOrStatement;
-        virtual void accept(ASTvisitor &v)
-        {
-            v.visit(*this);
-        }
-};
-class ASTBlockOrStatement : public ASTnode
-{
-    public:
-        virtual void accept(ASTvisitor &v)
-        {
-            v.visit(*this);
-        }
-};
-class ASTIfBlock : public ASTBlockOrStatement
-{
-    public:
-        ASTBlock * IfBlock;
-        virtual void accept(ASTvisitor &v)
-        {
-            v.visit(*this);
-        }
-};
-class ASTSingleStat : public ASTBlockOrStatement
-{
-    public:
-        ASTStat * stat;
         virtual void accept(ASTvisitor &v)
         {
             v.visit(*this);
@@ -487,7 +457,27 @@ class ASTVarAssign : public ASTnode
             v.visit(*this);
         }
 };
-class ASTFuncDec : public ASTnode
+class ASTRoot : public ASTnode
+{
+    public:
+        virtual void accept(ASTvisitor &v)
+        {
+            v.visit(*this);
+        }
+};
+class ASTListFuncDec : public ASTnode
+{
+    public:
+        std::string datatype;
+        std::string funcname;
+        ASTListArgs* params_list;
+        ASTBlock* block;
+        virtual void accept(ASTvisitor &v)
+        {
+            v.visit(*this);
+        }
+};
+class ASTFuncDec : public ASTRoot
 {
     public:
         std::vector<ASTListFuncDec *> FuncDecList;
@@ -499,14 +489,13 @@ class ASTFuncDec : public ASTnode
 class ASTProg : public ASTnode
 {
     public:
-        ASTnode *root;
-        // std::vector<ASTStat *> statementList;
+        ASTRoot *root;
         virtual void accept(ASTvisitor &v)
         {
             v.visit(*this);
         }
 };
-class ASTBlank : public ASTnode
+class ASTBlank : public ASTRoot
 {
     public:
         virtual void accept(ASTvisitor &v)
@@ -515,12 +504,12 @@ class ASTBlank : public ASTnode
         }
 
 };
-class ASTGlobalDecl : public ASTnode
+class ASTGlobalDecl : public ASTRoot
 {
     public:
         std::string datatype;
         std::vector<ASTIndividualDecl* > DeclStatementList;
-        ASTnode* root;
+        ASTRoot* root;
         virtual void accept(ASTvisitor &v)
         {
             v.visit(*this);

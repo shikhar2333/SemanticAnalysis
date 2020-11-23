@@ -7,7 +7,7 @@
 #include "ExprBuildASTVisitor.h"
 
 #include "PostfixVisitor.h"
-// #include "ast.h"
+//#include "ast.h"
 
 using namespace std;
 using namespace antlr4;
@@ -30,7 +30,7 @@ int main(int argc, const char* argv[]) {
 
     ASTProg *program_root = visitor->visitProg(ctx);
     //visitor->visitProg(ctx);
-    //PostFixVisitor *pv = new PostFixVisitor();
-    //pv->visit(*program_root);
+    PostFixVisitor *pv = new PostFixVisitor();
+    pv->visit(*program_root);
     return 0;
 }

@@ -13,8 +13,8 @@ function int main()
 	print("Enter Dimensions of matrix 2:");
 	input(m2);
 	input(n2);
-	int i;
-	int j;
+	int i,j;
+	//int j;
 	int k;
 	if (m2 != n1)
 	{

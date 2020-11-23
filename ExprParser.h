@@ -19,7 +19,7 @@ public:
     RightSqr = 26, LeftCurly = 27, RightCurly = 28, DOUBLEQUOTE = 29, NOT = 30, 
     ADDOP = 31, MULT = 32, MODULO = 33, DIV = 34, INC_DEC = 35, AND_OR = 36, 
     RELOP = 37, EQOP = 38, ASSIGN = 39, BITWISE_OP = 40, SHIFT_OP = 41, 
-    STRING = 42, INT_CONST = 43, VAR_NAME = 44, CHAR = 45, COMMENT = 46, 
+    STRING = 42, INT_CONST = 43, CHAR = 44, VAR_NAME = 45, COMMENT = 46, 
     SINGLECOMMENT = 47, NS = 48
   };
 
@@ -539,7 +539,6 @@ public:
     ConditionContext *condition();
     antlr4::tree::TerminalNode *RightParen();
     BlockOrStatementContext *blockOrStatement();
-    DatatypeContext *datatype();
 
 
     virtual antlrcpp::Any accept(antlr4::tree::ParseTreeVisitor *visitor) override;

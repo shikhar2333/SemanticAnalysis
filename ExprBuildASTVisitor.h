@@ -13,6 +13,7 @@ public:
       cout << "In visitProg" << endl;
       ASTProg *node = new ASTProg();
       node->root = visit(ctx->root());
+      //cout<<"Exit"<<'\n';
       return node;
   }
 
@@ -31,12 +32,17 @@ public:
       }
       auto ptr = ctx->globaldeclaration();
       if(ptr)
-        ASTnode * a = visit(ptr);
+        auto a = visit(ptr);
+      
+      auto ptr1 = ctx->blankdeclaration();
+      if(ptr1)
+        auto a = visit(ptr1);
       // for(auto f: node->FuncDecList)
       // {
       //   cout<<f->funcname<<'\n';
       // }
-      return (ASTnode *) node;
+      //cout<<"Exit Root"<<'\n';
+      return (ASTRoot *) node;
   }
    
   virtual antlrcpp::Any visitGlobaldeclaration(ExprParser::GlobaldeclarationContext *ctx) override
@@ -53,14 +59,15 @@ public:
           node->DeclStatementList.push_back(individualNode);
         }
     }
+    //cout<<node->DeclStatementList.size()<<'\n';
     node->root = visit(ctx->root());
-    return (ASTnode *)node;
+    return (ASTRoot *)node;
   }
   virtual antlrcpp::Any visitBlankdeclaration(ExprParser::BlankdeclarationContext *ctx) override 
   {
     cout<<"In visitBlankdeclaration"<<'\n';
     ASTBlank *node = new ASTBlank();
-    return (ASTnode *)node;
+    return (ASTRoot *)node;
   }
   virtual antlrcpp::Any visitListFuncDec(ExprParser::ListFuncDecContext *ctx) override 
   {
@@ -339,11 +346,11 @@ public:
     ASTBlockOrStatement* node = new ASTBlockOrStatement();
     if(ctx->block() != nullptr)
     {
-      visit(ctx->block());  
+      node->block =  visit(ctx->block());  
     }
     if(ctx->statement() != nullptr)
     {
-      visit(ctx->statement());
+      node->statement = visit(ctx->statement());
     }
     return node;
   }
@@ -631,7 +638,6 @@ public:
       string op = ctx->MULT()->getText();
       node = new ASTExprBinary(op, left, right);
       return (ASTExpr *)node;
-      return visitChildren(ctx);
   }
 
   virtual antlrcpp::Any visitConstIntExpr(ExprParser::ConstIntExprContext *ctx) override
@@ -674,6 +680,7 @@ public:
     cout<<"In visitBitwiseOpExpr"<<'\n';
     right = visit(ctx->expr(1));
     string op = ctx->BITWISE_OP()->getText();
+    node = new ASTExprBinary(op, left, right);
     //cout<<"Exit Bitwise"<<'\n';
     return (ASTExpr *)node;
   }
@@ -735,7 +742,11 @@ public:
   {
     return visitChildren(ctx);
   }
-
+  // virtual antlrcpp::Any visitVarname(ExprParser::VarnameContext *ctx) override 
+  // {
+  //   cout<<"In visitVarname"<<'\n';
+  //   return visitChildren(ctx);
+  // }
   virtual antlrcpp::Any visitCaller(ExprParser::CallerContext *ctx) override
   {
     return visitChildren(ctx);

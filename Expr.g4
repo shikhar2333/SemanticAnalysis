@@ -51,7 +51,7 @@ break_stmnt: 'break' Semi;
 cont_stmnt: 'continue' Semi;
 
 while_loop: 'while' LeftParen condition RightParen blockOrStatement;
-for_loop: 'for' LeftParen (datatype)? varassign Semi condition Semi varassign RightParen blockOrStatement;
+for_loop: 'for' LeftParen varassign Semi condition Semi varassign RightParen blockOrStatement;
 
 declaration: (datatype) individualDeclaration? (Comma individualDeclaration)* Semi;
 
@@ -136,8 +136,8 @@ SHIFT_OP  :  ('>>' | '<<' );
 
 STRING:   DOUBLEQUOTE .*? DOUBLEQUOTE;
 INT_CONST : [0-9]+ ;
-VAR_NAME : [a-z][a-zA-Z0-9_]*;
 CHAR : '\'' [a-zA-Z] '\'';
+VAR_NAME : [a-z][a-zA-Z0-9_]*;
 COMMENT : '/*' .*? '*/' -> skip ;
 SINGLECOMMENT : '//' .*? '\n' -> skip ;
 NS : [ \t\r\n]+ -> skip ;
