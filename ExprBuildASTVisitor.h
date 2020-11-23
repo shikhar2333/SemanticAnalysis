@@ -13,36 +13,56 @@ public:
       cout << "In visitProg" << endl;
       ASTProg *node = new ASTProg();
       node->root = visit(ctx->root());
-      //cout<<"Exit"<<'\n';
+      //cout<<"Exit visitProg"<<'\n';
+      // if(!pro)
+      //     cout<<"Seg Fault"<<'\n';
+      // if(dynamic_cast<ASTGlobalDecl*>(pro) )
+      //     cout<<"Global Decl"<<'\n';
+      // if(dynamic_cast<ASTFuncDec*>(pro) )
+      //     cout<<"Func Decl"<<'\n';
+      // if(dynamic_cast<ASTBlank*>(pro) )
+      //     cout<<"Blank Decl"<<'\n';
       return node;
   }
 
   virtual antlrcpp::Any visitRoot(ExprParser::RootContext *ctx) override
   {
       cout<<"In visitRoot"<<'\n';
-      ASTFuncDec *node = new ASTFuncDec();
-      ASTListFuncDec *funcNode;
-      for (auto func : ctx->func_declaration())
+      if(!ctx->func_declaration().empty())
       {
-          funcNode = visit(func);
-          if (funcNode != nullptr)
-          {
-              node->FuncDecList.push_back(funcNode);
-          }
+        //cout<<"In FuncDec"<<'\n';
+        ASTFuncDec* node = new ASTFuncDec();
+        ASTListFuncDec *funcNode;
+        for (auto func : ctx->func_declaration())
+        {
+            funcNode = visit(func);
+            if (funcNode != nullptr)
+            {
+                node->FuncDecList.push_back(funcNode);
+            }
+        }
+        //cout<<"Exit FuncDec"<<'\n';
+        return (ASTRoot*)node;
       }
-      auto ptr = ctx->globaldeclaration();
-      if(ptr)
-        auto a = visit(ptr);
-      
-      auto ptr1 = ctx->blankdeclaration();
-      if(ptr1)
-        auto a = visit(ptr1);
+      if(ctx->globaldeclaration())
+      {
+        //cout<<"In GlobalDeclaration"<<'\n';
+        ASTGlobalDecl* node = visit(ctx->globaldeclaration());
+        //cout<<"Exit globaldeclration"<<'\n';
+        return (ASTRoot*)node;
+      }
+      if(ctx->blankdeclaration())
+      {
+        //cout<<"In blankdeclaration"<<'\n';
+        ASTBlank* node = visit(ctx->blankdeclaration());
+        return (ASTRoot*)node;
+      }
       // for(auto f: node->FuncDecList)
       // {
       //   cout<<f->funcname<<'\n';
       // }
-      //cout<<"Exit Root"<<'\n';
-      return (ASTRoot *) node;
+      assert(0 && "Error in visitRoot");
+      return nullptr;
   }
    
   virtual antlrcpp::Any visitGlobaldeclaration(ExprParser::GlobaldeclarationContext *ctx) override
@@ -59,15 +79,16 @@ public:
           node->DeclStatementList.push_back(individualNode);
         }
     }
-    //cout<<node->DeclStatementList.size()<<'\n';
-    node->root = visit(ctx->root());
-    return (ASTRoot *)node;
+    if(ctx->root())
+      node->root = visit(ctx->root());
+    //cout<<"Exit visitGlobalDeclaration"<<'\n';
+    return node;
   }
   virtual antlrcpp::Any visitBlankdeclaration(ExprParser::BlankdeclarationContext *ctx) override 
   {
     cout<<"In visitBlankdeclaration"<<'\n';
     ASTBlank *node = new ASTBlank();
-    return (ASTRoot *)node;
+    return node;
   }
   virtual antlrcpp::Any visitListFuncDec(ExprParser::ListFuncDecContext *ctx) override 
   {
@@ -77,7 +98,7 @@ public:
     node->funcname = ctx->VAR_NAME()->getText();
     node->params_list = visit(ctx->list_args());
     node->block = visit(ctx->block());
-    // cout<<"Exit"<<'\n';
+    //cout<<"Exit visitListFuncDec"<<'\n';
     return node;
   }
 
@@ -92,6 +113,7 @@ public:
         params_node->varname.assign(ctx->VAR_NAME()[i]->getText());
         node->params_list.push_back(params_node);
     }
+    //cout<<"Exit visitList_args"<<'\n';
     return node;
   }
 
@@ -108,7 +130,7 @@ public:
             node->statementList.push_back(statnode);
         }
     }
-    //cout<<"Block"<<'\n';
+    //cout<<"Exit Block"<<'\n';
     return node;
   }
 
@@ -179,7 +201,7 @@ public:
   {
     cout<<"In visitVarInput"<<'\n';
     ASTVarInput *node = new ASTVarInput();
-    node->varname = ctx->VAR_NAME()->getText();    
+    node->varname = visit(ctx->identifier());    
     return (ASTInputArgs *)node;
   }
 
@@ -187,7 +209,7 @@ public:
   {
     cout<<"In visitArray2DInput"<<'\n';
     ASTArray2DInput *node = new ASTArray2DInput();
-    node->varname = ctx->VAR_NAME()->getText();
+    node->varname = visit(ctx->identifier());
     node->expr1 = visit(ctx->expr(0));
     node->expr2 = visit(ctx->expr(1));
     return (ASTInputArgs *)node;
@@ -197,7 +219,7 @@ public:
   {
     cout<<"In visitArrayInput"<<'\n';
     ASTArrayInput *node = new ASTArrayInput();
-    node->varname = ctx->VAR_NAME()->getText();
+    node->varname = visit(ctx->identifier());
     node->expr = visit(ctx->expr());
     return (ASTInputArgs *)node;
   }
@@ -285,7 +307,7 @@ public:
   {
     cout<<"In visitVarassign"<<'\n';
     ASTVarAssign* node = new ASTVarAssign();
-    node->varname = ctx->VAR_NAME()->getText();
+    node->varname = visit(ctx->identifier());
     // cout<<node->varname<<'\n';
     node->expr = visit(ctx->expr());
     // cout<<"exit"<<'\n';
@@ -295,7 +317,7 @@ public:
   {
     cout<<"In visitVarAssignment"<<'\n';
     ASTVarAssignment* node = new ASTVarAssignment();
-    node->varname = ctx->VAR_NAME()->getText();
+    node->varname = visit(ctx->identifier());
     node->expr = visit(ctx->expr());
     return (ASTAssignment *) node;
   }
@@ -437,7 +459,7 @@ public:
   {
     cout<<"In visitPreIncDecArr"<<'\n';
     ASTPreIncDecArr *node = new ASTPreIncDecArr();
-    node->varname = ctx->VAR_NAME()->getText();
+    node->varname = visit(ctx->identifier());
     node->expr = visit(ctx->expr());
     node->op = ctx->INC_DEC()->getText();
     return (ASTExpr *)node;
@@ -447,7 +469,7 @@ public:
   {
     cout<<"In visitPreIncDec2DArr"<<'\n';
     ASTPreIncDec2DArr *node = new ASTPreIncDec2DArr();
-    node->varname = ctx->VAR_NAME()->getText();
+    node->varname = visit(ctx->identifier());
     node->expr1 = visit(ctx->expr(0));
     node->expr2 = visit(ctx->expr(1));
     node->op = ctx->INC_DEC()->getText();
@@ -515,7 +537,7 @@ public:
   {
     cout<<"In visitArrayValExpr"<<'\n';
     ASTArrayValExpr* node = new ASTArrayValExpr();
-    node->varname = ctx->VAR_NAME()->getText();
+    node->varname = visit(ctx->identifier());
     node->expr = visit(ctx->expr());
     return (ASTExpr *)node;
   }
@@ -524,7 +546,7 @@ public:
   {
     cout<<"In visitPostIncDecArr"<<'\n';
     ASTPostIncDecArr *node = new ASTPostIncDecArr();
-    node->varname = ctx->VAR_NAME()->getText();
+    node->varname = visit(ctx->identifier());
     node->expr = visit(ctx->expr());
     node->op = ctx->INC_DEC()->getText();
     return (ASTExpr *)node;
@@ -533,7 +555,7 @@ public:
   {
     cout<<"In visitPostIncDec2DArr"<<'\n';
     ASTPostIncDec2DArr *node = new ASTPostIncDec2DArr();
-    node->varname = ctx->VAR_NAME()->getText();
+    node->varname = visit(ctx->identifier());
     node->expr1 = visit(ctx->expr(0));
     node->expr2 = visit(ctx->expr(1));
     node->op = ctx->INC_DEC()->getText();
@@ -559,7 +581,7 @@ public:
   {
     cout<<"In visitAssign2DArrayExpr"<<'\n';
     ASTAssign2DArrayExpr* node = new ASTAssign2DArrayExpr();
-    node->varname = ctx->VAR_NAME()->getText();
+    node->varname = visit(ctx->identifier());
     node->expr1 = visit(ctx->expr(0));
     node->expr2 = visit(ctx->expr(1));
     node->expr3 = visit(ctx->expr(2));
@@ -570,7 +592,7 @@ public:
   {
     cout<<"In visitPostIncDecExpr"<<'\n';
     ASTPostIncDecExpr * node = new ASTPostIncDecExpr();
-    node->varname = ctx->VAR_NAME()->getText();
+    node->varname = visit(ctx->identifier());
     node->op = ctx->INC_DEC()->getText();
     return (ASTExpr *)node;
   }
@@ -604,7 +626,7 @@ public:
   {
     cout<<"In visitD2ArrayValExpr"<<'\n';
     ASTD2ArrayValExpr* node = new ASTD2ArrayValExpr();
-    node->varname = ctx->VAR_NAME()->getText();
+    node->varname = visit(ctx->identifier());
     node->expr1 = visit(ctx->expr(0));
     node->expr2 = visit(ctx->expr(1));
     return (ASTExpr *)node;
@@ -614,7 +636,7 @@ public:
   {
       ASTExprID* varname;
       cout<<"In visitVarnameExpr"<<'\n';
-      varname = new ASTExprID(ctx->VAR_NAME()->getText());
+      varname = visit(ctx->identifier());
       //cout<<"Exiter varname"<<'\n';
       return (ASTExpr*) varname;
   }
@@ -653,7 +675,7 @@ public:
   {
       cout<<"In visitAssignArrayExpr"<<'\n';
       ASTAssignArrayExpr* node = new ASTAssignArrayExpr();
-      node->varname = ctx->VAR_NAME()->getText();
+      node->varname = visit(ctx->identifier());
       node->expr1 = visit(ctx->expr(0));
       node->expr2 = visit(ctx->expr(1));
       return (ASTAssignment *)node;
@@ -689,7 +711,7 @@ public:
   {
     cout<<"In visitPreIncDecExpr"<<'\n';
     ASTPreIncDecExpr *node = new ASTPreIncDecExpr();
-    node->varname = ctx->VAR_NAME()->getText();
+    node->varname = visit(ctx->identifier());
     node->op = ctx->INC_DEC()->getText();
     return (ASTExpr *)node;
   }
@@ -742,11 +764,12 @@ public:
   {
     return visitChildren(ctx);
   }
-  // virtual antlrcpp::Any visitVarname(ExprParser::VarnameContext *ctx) override 
-  // {
-  //   cout<<"In visitVarname"<<'\n';
-  //   return visitChildren(ctx);
-  // }
+  virtual antlrcpp::Any visitIdentifier(ExprParser::IdentifierContext *ctx) override 
+  {
+    cout<<"In visitIdentifier"<<'\n';
+    ASTExprID* node = new ASTExprID(ctx->VAR_NAME()->getText());
+    return node;
+  }
   virtual antlrcpp::Any visitCaller(ExprParser::CallerContext *ctx) override
   {
     return visitChildren(ctx);

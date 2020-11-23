@@ -9,20 +9,13 @@ struct Variable
 };
 typedef struct Variable Variable;
 std::vector< std::vector<Variable> > SymbolTable;
+std::vector<Variable> Func_Args;
 class PostFixVisitor : public ASTvisitor
 {
 public:
     void visit(ASTProg &node)
     {
         cout << "PostFixVisit traversal invoked" << endl;
-        if(!node.root)
-            cout<<"Seg Fault"<<'\n';
-        if(dynamic_cast<ASTGlobalDecl*>(node.root) )
-            cout<<"Global Decl"<<'\n';
-        if(dynamic_cast<ASTFuncDec*>(node.root) )
-            cout<<"Func Decl"<<'\n';
-        if(dynamic_cast<ASTBlank*>(node.root) )
-            cout<<"Blank Decl"<<'\n';
         node.root->accept(*this);
     }
     void visit(ASTRoot &node)override{}
@@ -30,12 +23,16 @@ public:
     {
         cout<<"In ASTFuncDec"<<'\n';
         int i = 1;
-        // cout<<"Function size: "<<node.FuncDecList.size()<<'\n';
         for (auto func : node.FuncDecList)
         {
             cout << "Function #" <<i<<'\n';
+            // SymbolTable.push_back(vector<Variable>());
             func->accept(*this);
             i = i + 1;
+        }
+        while(!Func_Args.empty())
+        {
+            Func_Args.pop_back();
         }
     }
     void visit(ASTGlobalDecl &node)
@@ -43,13 +40,21 @@ public:
         cout<<"In ASTGlobalDecl"<<'\n';
         cout<<"Global Datatype: "<<node.datatype<<'\n';
         int i=1;
+        SymbolTable.push_back(vector<Variable>());
+        Variable x;
+        x.datatype.assign(node.datatype);
+        x.varname.assign(node.datatype);
+        int last = SymbolTable.size() - 1;
         for(auto decl: node.DeclStatementList)
         {
             cout<<"GlobalDeclaration #"<<i<<'\n';
+            SymbolTable[last].push_back(x);
             decl->accept(*this);
             i++;
         }
-        node.root->accept(*this);
+        if(node.root)
+            node.root->accept(*this);
+        SymbolTable.pop_back();
     }
     void visit(ASTBlank &node)
     {
@@ -77,16 +82,15 @@ public:
     {
         cout<<"In ASTBlock"<<'\n';
         int i = 1;
-        Variable t;
-        t.datatype.assign("dummy_datatype");
-        t.varname.assign("dummy_var");
-        vector<Variable> v;
-        v.push_back(t);
-        SymbolTable.push_back(v);
+        SymbolTable.push_back(vector<Variable>());
+        int last = SymbolTable.size() - 1;
+        for(auto func_args: Func_Args)
+            SymbolTable[last].push_back(func_args);
         for (auto stat : node.statementList)
         {
             cout << "Statement #" <<i<<'\n';
             stat->accept(*this);
+            //cout<<"Exit Statement#"<<i<<'\n';
             i = i + 1;
         }
         SymbolTable.pop_back();
@@ -99,7 +103,6 @@ public:
         Variable x;
         x.datatype.assign(node.datatype);
         x.varname.assign(node.datatype);
-        //int scope_last = SymbolTable[last].size() - 1;
         for(auto decl : node.DeclStatementList)
         {
             cout<<"Declaration #"<<i<<'\n';
@@ -114,17 +117,16 @@ public:
         cout<<"In ASTVarDecl"<<'\n';
         int last = SymbolTable.size() - 1;
         int scope_last = SymbolTable[last].size() - 1;
-        //cout<<scope_last<<'\n'; 
         SymbolTable[last][scope_last].varname.assign(node.varname);
-        for(int i=0; i<SymbolTable.size(); i++)
-        {
-            //cout<<i<<'\n';
-            for(int j=0; j<SymbolTable[i].size(); j++)
-            {
-                cout<<SymbolTable[i][j].varname<<" "<<SymbolTable[i][j].datatype<<" ";
-            }
-            cout<<'\n';
-        }
+        // for(int i=0; i<SymbolTable.size(); i++)
+        // {
+        //     //cout<<i<<'\n';
+        //     for(int j=0; j<SymbolTable[i].size(); j++)
+        //     {
+        //         cout<<SymbolTable[i][j].varname<<" "<<SymbolTable[i][j].datatype<<" ";
+        //     }
+        //     cout<<'\n';
+        // }
         if(node.expr)
             node.expr->accept(*this);
     }
@@ -133,22 +135,36 @@ public:
         cout<<"In ASTArrayDeclaration"<<'\n';
         if(node.array_ref)
             node.array_ref->accept(*this);
+        
+        int last = SymbolTable.size() - 1;
+        int scope_last = SymbolTable[last].size() - 1;
+        SymbolTable[last][scope_last].varname.assign(node.varname);
     }
     void visit(ASTD2ArrayDeclaration &node)
     {
         cout<<"In ASTD2ArrayDeclaration"<<'\n';
         if(node.array_ref)
             node.array_ref->accept(*this);
+        
+        int last = SymbolTable.size() - 1;
+        int scope_last = SymbolTable[last].size() - 1;
+        SymbolTable[last][scope_last].varname.assign(node.varname);
     }
     void visit(ASTArrayAssignment &node)
     {
         cout<<"In ASTArrayAssignment"<<'\n';
         node.array_ref->accept(*this);
+        int last = SymbolTable.size() - 1;
+        int scope_last = SymbolTable[last].size() - 1;
+        SymbolTable[last][scope_last].varname.assign(node.varname);
     }
     void visit(ASTD2ArrayAssignment &node)
     {
         cout<<"In ASTD2ArrayAssignment"<<'\n';
         node.array_ref->accept(*this);
+        int last = SymbolTable.size() - 1;
+        int scope_last = SymbolTable[last].size() - 1;
+        SymbolTable[last][scope_last].varname.assign(node.varname);
     }
     void visit(ASTArrayRef &node)
     {
@@ -178,16 +194,22 @@ public:
         node.node->accept(*this);
         //cout<<"Exit ASTExprStat"<<'\n';
     }
-    void visit(ASTAssignStatement &node) override{}
+    void visit(ASTAssignStatement &node)
+    {
+        cout<<"In ASTAssignStatement"<<'\n';
+        node.assignment->accept(*this);
+    }
 
     void visit(ASTVarAssignment &node)
     {
         cout<<"In ASTVarAssignment"<<'\n';
+        node.varname->accept(*this);
         node.expr->accept(*this);
     }
     void visit(ASTAssign2DArrayExpr &node)
     {
         cout<<"In ASTAssign2DArrayExpr"<<'\n';
+        node.varname->accept(*this);
         node.expr1->accept(*this);
         node.expr2->accept(*this);
         node.expr3->accept(*this);
@@ -195,6 +217,7 @@ public:
     void visit(ASTAssignArrayExpr &node)
     {
         cout<<"In ASTAssignArrayExpr"<<'\n';
+        node.varname->accept(*this);
         node.expr1->accept(*this);
         node.expr2->accept(*this);
     }
@@ -230,33 +253,39 @@ public:
     void visit(ASTExpr &node) override{}
     void visit(ASTPostIncDecExpr &node)
     {
+        node.varname->accept(*this);
         cout<<"In ASTPostIncDecExpr"<<'\n';
     }
     void visit(ASTPostIncDec2DArr &node)
     {
         cout<<"In ASTPostIncDec2DArr"<<'\n';
+        node.varname->accept(*this);
         node.expr1->accept(*this);
         node.expr2->accept(*this);
     }
     void visit(ASTPreIncDec2DArr &node)
     {
         cout<<"In ASTPreIncDec2DArr"<<'\n';
+        node.varname->accept(*this);
         node.expr1->accept(*this);
         node.expr2->accept(*this);
     }
     void visit(ASTPostIncDecArr &node)
     {
         cout<<"In ASTPostIncDecArr"<<'\n';
+        node.varname->accept(*this);
         node.expr->accept(*this);
     }
     void visit(ASTPreIncDecArr &node)
     {
         cout<<"In ASTPreIncDecArr"<<'\n';
+        node.varname->accept(*this);
         node.expr->accept(*this);
     }
     void visit(ASTPreIncDecExpr &node)
     {
         cout<<"In ASTPreIncDecExpr"<<'\n';
+        node.varname->accept(*this);
     }
     void visit(ASTParenExpr &node)
     {
@@ -266,11 +295,13 @@ public:
     void visit(ASTArrayValExpr &node)
     {
         cout<<"In ASTArrayValExpr"<<'\n';
+        node.varname->accept(*this);
         node.expr->accept(*this);
     }
     void visit(ASTD2ArrayValExpr &node)
     {
         cout<<"In ASTD2ArrayValExpr"<<'\n';
+        node.varname->accept(*this);
         node.expr1->accept(*this);
         node.expr2->accept(*this);
     }
@@ -298,12 +329,27 @@ public:
         // visit(node.getFirst());
         // visit(node.getSecond());
         // visit(node.getThird());
-        cout << " ?:";
+        cout << " ?: ";
     }
 
     void visit(ASTExprID &node)
     {
-        cout << " " << node.getID();
+        //cout<<node.getID()<<" ";
+        std::string id = node.getID();
+        for(vector<vector<Variable>>::reverse_iterator rev_itr = SymbolTable.rbegin(); rev_itr!=SymbolTable.rend(); rev_itr++)
+        {
+            for(auto &var: *rev_itr)
+            {
+                cout<<var.varname<<" ";
+                if(var.varname == id)
+                {
+                    return;
+                }
+            }
+            cout<<'\n';
+        }
+        cout<<"Variable is being used before declaration"<<'\n';
+        exit(0);
     }
     void visit(ASTExprINT &node)
     {
@@ -324,6 +370,10 @@ public:
     {
         cout<<"Variable Datatype: "<<node.datatype<<" ";
         cout<<"Variable Name: "<<node.varname<<'\n';
+        Variable x;
+        x.datatype.assign(node.datatype);
+        x.varname.assign(node.varname);
+        Func_Args.push_back(x);
     }
     void visit(ASTIf &node)
     {
@@ -374,7 +424,8 @@ public:
     void visit(ASTVarAssign &node)
     {
         cout<<"In ASTVarAssign"<<'\n';
-        cout<<"For Loop Variable: "<<node.varname<<'\n';
+        //cout<<"For Loop Variable: "<<node.varname<<'\n';
+        node.varname->accept(*this);
         node.expr->accept(*this);
     }
 
@@ -413,18 +464,21 @@ public:
     void visit(ASTVarInput &node)
     {
         cout<<"In ASTVarInput"<<'\n';
-        cout<<"Variable for Input: "<<node.varname<<'\n';
+        //cout<<"Variable for Input: "<<node.varname<<'\n';
+        node.varname->accept(*this);
     }
     void visit(ASTArrayInput &node)
     {
         cout<<"In ASTVarInput"<<'\n';
-        cout<<"Array Variable for Input: "<<node.varname<<'\n';
+        //cout<<"Array Variable for Input: "<<node.varname<<'\n';
+        node.varname->accept(*this);
         node.expr->accept(*this);
     }
     void visit(ASTArray2DInput &node)
     {
         cout<<"In ASTVarInput"<<'\n';
-        cout<<"2D Array Variable for Input: "<<node.varname<<'\n';
+        //cout<<"2D Array Variable for Input: "<<node.varname<<'\n';
+        node.varname->accept(*this);
         node.expr1->accept(*this);
         node.expr2->accept(*this);
     }

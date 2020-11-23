@@ -1,10 +1,14 @@
 //int a = callout f(1 != 2, +2);
 //int b = true;
-int b;
-//function int main(int x)
-//{
+//int b;
+int arr[50];
+function int main(int x, int argc, int argv)
+{
     //int a[][] = {1,2,3};
-    //char c;
+    arr[2] = 1;
+    //char c; 
+    //a = 1;
+    //int z;
     //int a[][] = {2+3,2};
     //23;
     //input(c);
@@ -31,4 +35,4 @@ int b;
     	//a = ++a;
     	//continue;
     // return;
-  //}
+  }

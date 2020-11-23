@@ -303,6 +303,10 @@ public:
     return visitChildren(ctx);
   }
 
+  virtual antlrcpp::Any visitIdentifier(ExprParser::IdentifierContext *ctx) override {
+    return visitChildren(ctx);
+  }
+
   virtual antlrcpp::Any visitCaller(ExprParser::CallerContext *ctx) override {
     return visitChildren(ctx);
   }

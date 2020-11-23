@@ -366,7 +366,7 @@ class ASTInputArgs : public ASTnode
 class ASTVarInput : public ASTInputArgs
 {
     public:
-        std::string varname;
+        ASTExprID* varname;
         virtual void accept(ASTvisitor &v)
         {
             v.visit(*this);
@@ -375,7 +375,7 @@ class ASTVarInput : public ASTInputArgs
 class ASTArrayInput : public ASTInputArgs
 {
     public:
-        std::string varname;
+        ASTExprID* varname;
         ASTExpr *expr;
         virtual void accept(ASTvisitor &v)
         {
@@ -385,7 +385,7 @@ class ASTArrayInput : public ASTInputArgs
 class ASTArray2DInput : public ASTInputArgs
 {
     public:
-        std::string varname;
+        ASTExprID* varname;
         ASTExpr *expr1, *expr2;
         virtual void accept(ASTvisitor &v)
         {
@@ -450,7 +450,7 @@ class ASTRelopExpr : public ASTCond
 class ASTVarAssign : public ASTnode
 {
      public:
-        std::string varname;
+        ASTExprID* varname;
         ASTExpr* expr;  
         virtual void accept(ASTvisitor &v)
         {
@@ -564,7 +564,7 @@ class ASTAssignStatement : public ASTStat
 class ASTVarAssignment : public ASTAssignment
 {
     public:
-        std::string varname;
+        ASTExprID* varname;
         ASTExpr* expr;
         virtual void accept(ASTvisitor &v)
         {
@@ -575,7 +575,7 @@ class ASTVarAssignment : public ASTAssignment
 class ASTAssignArrayExpr : public ASTAssignment
 {
     public:
-        std::string varname;
+        ASTExprID* varname;
         ASTExpr *expr1, *expr2;
         virtual void accept(ASTvisitor &v)
         {
@@ -586,7 +586,7 @@ class ASTAssignArrayExpr : public ASTAssignment
 class ASTAssign2DArrayExpr : public ASTAssignment
 {
     public:
-        std::string varname;
+        ASTExprID* varname;
         ASTExpr *expr1, *expr2, *expr3;
         virtual void accept(ASTvisitor &v)
         {
@@ -633,7 +633,7 @@ class ASTParenExpr : public ASTExpr
 class ASTArrayValExpr : public ASTExpr
 {
     public:
-        std::string varname;
+        ASTExprID* varname;
         ASTExpr* expr;
         virtual void accept(ASTvisitor &v)
         {
@@ -643,7 +643,7 @@ class ASTArrayValExpr : public ASTExpr
 class ASTD2ArrayValExpr : public ASTExpr
 {
     public:
-        std::string varname;
+        ASTExprID* varname;
         ASTExpr *expr1, *expr2;
         virtual void accept(ASTvisitor &v)
         {
@@ -653,7 +653,7 @@ class ASTD2ArrayValExpr : public ASTExpr
 class ASTPostIncDecExpr : public ASTExpr
 {
     public:
-        std::string varname;
+        ASTExprID* varname;
         std::string op;
         virtual void accept(ASTvisitor &v)
         {
@@ -663,7 +663,7 @@ class ASTPostIncDecExpr : public ASTExpr
 class ASTPostIncDec2DArr : public ASTExpr
 {
     public:
-        std::string varname;
+        ASTExprID* varname;
         ASTExpr *expr1, *expr2;
         std::string op;
         virtual void accept(ASTvisitor &v)
@@ -674,7 +674,7 @@ class ASTPostIncDec2DArr : public ASTExpr
 class ASTPostIncDecArr : public ASTExpr
 {
     public:
-        std::string varname;
+        ASTExprID* varname;
         ASTExpr *expr;
         std::string op;
         virtual void accept(ASTvisitor &v)
@@ -685,7 +685,7 @@ class ASTPostIncDecArr : public ASTExpr
 class ASTPreIncDecExpr : public ASTExpr
 {
     public:
-        std::string varname;
+        ASTExprID* varname;
         std::string op;
         virtual void accept(ASTvisitor &v)
         {
@@ -695,7 +695,7 @@ class ASTPreIncDecExpr : public ASTExpr
 class ASTPreIncDecArr : public ASTExpr
 {
     public:
-        std::string varname;
+        ASTExprID* varname;
         ASTExpr *expr;
         std::string op;
         virtual void accept(ASTvisitor &v)
@@ -706,7 +706,7 @@ class ASTPreIncDecArr : public ASTExpr
 class ASTPreIncDec2DArr : public ASTExpr
 {
     public:
-        std::string varname;
+        ASTExprID* varname;
         ASTExpr *expr1, *expr2;
         std::string op;
         virtual void accept(ASTvisitor &v)

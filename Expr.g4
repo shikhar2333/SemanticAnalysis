@@ -32,9 +32,9 @@ statement: call		      # funccallStatement
          | cont_stmnt     # continueStatement
          ;
 
-assignment: VAR_NAME ASSIGN expr Semi								         # VarAssignment
-    | VAR_NAME LeftSqr expr RightSqr LeftSqr expr RightSqr ASSIGN expr Semi	 # assign2DArrayExpr
-	| VAR_NAME LeftSqr expr RightSqr ASSIGN expr Semi                        # assignArrayExpr
+assignment: identifier ASSIGN expr Semi								             # VarAssignment
+    | identifier LeftSqr expr RightSqr LeftSqr expr RightSqr ASSIGN expr Semi	 # assign2DArrayExpr
+	| identifier LeftSqr expr RightSqr ASSIGN expr Semi                          # assignArrayExpr
 	;
 
 call : caller VAR_NAME params_list Semi;
@@ -42,9 +42,9 @@ call : caller VAR_NAME params_list Semi;
 printer: 'print' LeftParen ((expr|STRING) (Comma (expr|STRING))*)? RightParen Semi;
 input: 'input' LeftParen inputargs RightParen Semi;
 
-inputargs:  VAR_NAME                	                              # VarInput
-	     |  VAR_NAME LeftSqr expr RightSqr LeftSqr expr RightSqr      # Array2DInput
-	     |  VAR_NAME LeftSqr expr RightSqr                            # ArrayInput
+inputargs:  identifier                	                                # VarInput
+	     |  identifier LeftSqr expr RightSqr LeftSqr expr RightSqr      # Array2DInput
+	     |  identifier LeftSqr expr RightSqr                            # ArrayInput
 	     ;
 
 break_stmnt: 'break' Semi;
@@ -60,14 +60,14 @@ else_part: 'else' blockOrStatement;
 
 blockOrStatement: block|statement;
 
-individualDeclaration: VAR_NAME (ASSIGN expr)?	         # varDeclaration
-	| VAR_NAME'['INT_CONST']' array_ref?		         # arrayDeclaration
-	| VAR_NAME'['INT_CONST']''['INT_CONST']' array_ref?  # D2arrayDeclaration
-	| VAR_NAME'[]' array_ref				             # arrayAssignment
-	| VAR_NAME'[][]' array_ref				             # D2arrayAssignment
+individualDeclaration: VAR_NAME (ASSIGN expr)?	             # varDeclaration
+	| VAR_NAME '['INT_CONST']' array_ref?		             # arrayDeclaration
+	| VAR_NAME '['INT_CONST']''['INT_CONST']' array_ref?     # D2arrayDeclaration
+	| VAR_NAME '[]' array_ref				                 # arrayAssignment
+	| VAR_NAME '[][]' array_ref				                 # D2arrayAssignment
 	;
 
-varassign: VAR_NAME ASSIGN expr;
+varassign: identifier ASSIGN expr;
 
 condition: LeftParen condition RightParen                                  # ParanCond
     | NOT condition                                                        # NotCond
@@ -75,14 +75,14 @@ condition: LeftParen condition RightParen                                  # Par
     | expr (RELOP|BITWISE_OP|SHIFT_OP|EQOP|AND_OR) expr                    # RelopExpr		
     ;
 
-expr: VAR_NAME INC_DEC                                              # postIncDecExpr
-	| VAR_NAME LeftSqr expr RightSqr LeftSqr expr RightSqr INC_DEC	# postIncDec2DArr
-	| INC_DEC VAR_NAME LeftSqr expr RightSqr LeftSqr expr RightSqr	# preIncDec2DArr
-	| VAR_NAME LeftSqr expr RightSqr INC_DEC	                    # postIncDecArr 
-	| INC_DEC VAR_NAME LeftSqr expr RightSqr                        # preIncDecArr
+expr: identifier INC_DEC                                              # postIncDecExpr
+	| identifier LeftSqr expr RightSqr LeftSqr expr RightSqr INC_DEC	# postIncDec2DArr
+	| INC_DEC identifier LeftSqr expr RightSqr LeftSqr expr RightSqr	# preIncDec2DArr
+	| identifier LeftSqr expr RightSqr INC_DEC	                    # postIncDecArr 
+	| INC_DEC identifier LeftSqr expr RightSqr                        # preIncDecArr
 	| caller VAR_NAME params_list                                   # func_call
 	| ADDOP expr 	                                                # PlusMinusExpr
-    | INC_DEC VAR_NAME                                              # preIncDecExpr
+    | INC_DEC identifier                                              # preIncDecExpr
     | expr MODULO expr                                              # modExpr
 	| expr DIV expr                                                 # divExpr
 	| expr MULT expr                                                # multiplyExpr
@@ -91,11 +91,11 @@ expr: VAR_NAME INC_DEC                                              # postIncDec
 	| expr SHIFT_OP expr                                            # shiftOpExpr	  
 	| expr BITWISE_OP expr                                          # bitwiseOpExpr
 	| LeftParen expr RightParen	                                    # parenExpr
-	| VAR_NAME				                                        # varnameExpr
+	| identifier				                                        # varnameExpr
 	| INT_CONST				                                        # constIntExpr
 	| BOOL = ('true'|'false')										# boolExpr
-	| VAR_NAME LeftSqr expr RightSqr                                # ArrayValExpr
-	| VAR_NAME LeftSqr expr RightSqr LeftSqr expr RightSqr          # D2ArrayValExpr
+	| identifier LeftSqr expr RightSqr                                # ArrayValExpr
+	| identifier LeftSqr expr RightSqr LeftSqr expr RightSqr          # D2ArrayValExpr
 	| CHAR                                                          # charExpr
 	;
 
@@ -106,6 +106,7 @@ array_ref: ASSIGN LeftCurly (expr(Comma expr)*)? RightCurly;
 params_list : LeftParen (expr (Comma expr)*)? RightParen;
 
 datatype: 'int'| 'uint' | 'bool' | 'char'| 'void';
+identifier: VAR_NAME;
 
 RETURN : 'return' ;
 

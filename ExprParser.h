@@ -31,7 +31,7 @@ public:
     RuleFor_loop = 16, RuleDeclaration = 17, RuleIf_else = 18, RuleElse_part = 19, 
     RuleBlockOrStatement = 20, RuleIndividualDeclaration = 21, RuleVarassign = 22, 
     RuleCondition = 23, RuleExpr = 24, RuleRet = 25, RuleArray_ref = 26, 
-    RuleParams_list = 27, RuleDatatype = 28, RuleCaller = 29
+    RuleParams_list = 27, RuleDatatype = 28, RuleIdentifier = 29, RuleCaller = 30
   };
 
   ExprParser(antlr4::TokenStream *input);
@@ -73,6 +73,7 @@ public:
   class Array_refContext;
   class Params_listContext;
   class DatatypeContext;
+  class IdentifierContext;
   class CallerContext; 
 
   class  ProgContext : public antlr4::ParserRuleContext {
@@ -339,7 +340,7 @@ public:
   public:
     AssignArrayExprContext(AssignmentContext *ctx);
 
-    antlr4::tree::TerminalNode *VAR_NAME();
+    IdentifierContext *identifier();
     antlr4::tree::TerminalNode *LeftSqr();
     std::vector<ExprContext *> expr();
     ExprContext* expr(size_t i);
@@ -354,7 +355,7 @@ public:
   public:
     VarAssignmentContext(AssignmentContext *ctx);
 
-    antlr4::tree::TerminalNode *VAR_NAME();
+    IdentifierContext *identifier();
     antlr4::tree::TerminalNode *ASSIGN();
     ExprContext *expr();
     antlr4::tree::TerminalNode *Semi();
@@ -366,7 +367,7 @@ public:
   public:
     Assign2DArrayExprContext(AssignmentContext *ctx);
 
-    antlr4::tree::TerminalNode *VAR_NAME();
+    IdentifierContext *identifier();
     std::vector<antlr4::tree::TerminalNode *> LeftSqr();
     antlr4::tree::TerminalNode* LeftSqr(size_t i);
     std::vector<ExprContext *> expr();
@@ -451,7 +452,7 @@ public:
   public:
     VarInputContext(InputargsContext *ctx);
 
-    antlr4::tree::TerminalNode *VAR_NAME();
+    IdentifierContext *identifier();
 
     virtual antlrcpp::Any accept(antlr4::tree::ParseTreeVisitor *visitor) override;
   };
@@ -460,7 +461,7 @@ public:
   public:
     Array2DInputContext(InputargsContext *ctx);
 
-    antlr4::tree::TerminalNode *VAR_NAME();
+    IdentifierContext *identifier();
     std::vector<antlr4::tree::TerminalNode *> LeftSqr();
     antlr4::tree::TerminalNode* LeftSqr(size_t i);
     std::vector<ExprContext *> expr();
@@ -475,7 +476,7 @@ public:
   public:
     ArrayInputContext(InputargsContext *ctx);
 
-    antlr4::tree::TerminalNode *VAR_NAME();
+    IdentifierContext *identifier();
     antlr4::tree::TerminalNode *LeftSqr();
     ExprContext *expr();
     antlr4::tree::TerminalNode *RightSqr();
@@ -688,7 +689,7 @@ public:
   public:
     VarassignContext(antlr4::ParserRuleContext *parent, size_t invokingState);
     virtual size_t getRuleIndex() const override;
-    antlr4::tree::TerminalNode *VAR_NAME();
+    IdentifierContext *identifier();
     antlr4::tree::TerminalNode *ASSIGN();
     ExprContext *expr();
 
@@ -779,7 +780,7 @@ public:
     PreIncDec2DArrContext(ExprContext *ctx);
 
     antlr4::tree::TerminalNode *INC_DEC();
-    antlr4::tree::TerminalNode *VAR_NAME();
+    IdentifierContext *identifier();
     std::vector<antlr4::tree::TerminalNode *> LeftSqr();
     antlr4::tree::TerminalNode* LeftSqr(size_t i);
     std::vector<ExprContext *> expr();
@@ -794,7 +795,7 @@ public:
   public:
     VarnameExprContext(ExprContext *ctx);
 
-    antlr4::tree::TerminalNode *VAR_NAME();
+    IdentifierContext *identifier();
 
     virtual antlrcpp::Any accept(antlr4::tree::ParseTreeVisitor *visitor) override;
   };
@@ -813,7 +814,7 @@ public:
     PreIncDecArrContext(ExprContext *ctx);
 
     antlr4::tree::TerminalNode *INC_DEC();
-    antlr4::tree::TerminalNode *VAR_NAME();
+    IdentifierContext *identifier();
     antlr4::tree::TerminalNode *LeftSqr();
     ExprContext *expr();
     antlr4::tree::TerminalNode *RightSqr();
@@ -846,7 +847,7 @@ public:
   public:
     ArrayValExprContext(ExprContext *ctx);
 
-    antlr4::tree::TerminalNode *VAR_NAME();
+    IdentifierContext *identifier();
     antlr4::tree::TerminalNode *LeftSqr();
     ExprContext *expr();
     antlr4::tree::TerminalNode *RightSqr();
@@ -869,7 +870,7 @@ public:
   public:
     PostIncDecArrContext(ExprContext *ctx);
 
-    antlr4::tree::TerminalNode *VAR_NAME();
+    IdentifierContext *identifier();
     antlr4::tree::TerminalNode *LeftSqr();
     ExprContext *expr();
     antlr4::tree::TerminalNode *RightSqr();
@@ -904,7 +905,7 @@ public:
   public:
     PostIncDecExprContext(ExprContext *ctx);
 
-    antlr4::tree::TerminalNode *VAR_NAME();
+    IdentifierContext *identifier();
     antlr4::tree::TerminalNode *INC_DEC();
 
     virtual antlrcpp::Any accept(antlr4::tree::ParseTreeVisitor *visitor) override;
@@ -957,7 +958,7 @@ public:
     PreIncDecExprContext(ExprContext *ctx);
 
     antlr4::tree::TerminalNode *INC_DEC();
-    antlr4::tree::TerminalNode *VAR_NAME();
+    IdentifierContext *identifier();
 
     virtual antlrcpp::Any accept(antlr4::tree::ParseTreeVisitor *visitor) override;
   };
@@ -997,7 +998,7 @@ public:
   public:
     PostIncDec2DArrContext(ExprContext *ctx);
 
-    antlr4::tree::TerminalNode *VAR_NAME();
+    IdentifierContext *identifier();
     std::vector<antlr4::tree::TerminalNode *> LeftSqr();
     antlr4::tree::TerminalNode* LeftSqr(size_t i);
     std::vector<ExprContext *> expr();
@@ -1013,7 +1014,7 @@ public:
   public:
     D2ArrayValExprContext(ExprContext *ctx);
 
-    antlr4::tree::TerminalNode *VAR_NAME();
+    IdentifierContext *identifier();
     std::vector<antlr4::tree::TerminalNode *> LeftSqr();
     antlr4::tree::TerminalNode* LeftSqr(size_t i);
     std::vector<ExprContext *> expr();
@@ -1089,6 +1090,19 @@ public:
   };
 
   DatatypeContext* datatype();
+
+  class  IdentifierContext : public antlr4::ParserRuleContext {
+  public:
+    IdentifierContext(antlr4::ParserRuleContext *parent, size_t invokingState);
+    virtual size_t getRuleIndex() const override;
+    antlr4::tree::TerminalNode *VAR_NAME();
+
+
+    virtual antlrcpp::Any accept(antlr4::tree::ParseTreeVisitor *visitor) override;
+   
+  };
+
+  IdentifierContext* identifier();
 
   class  CallerContext : public antlr4::ParserRuleContext {
   public:

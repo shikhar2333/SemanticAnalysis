@@ -7,15 +7,15 @@ function int permute (int left, int right, int n)
 	{
 		for (i=left;i<=right;i=i+1)
 		{
-			temp = a[left];
-			a[left] = a[i];
-			a[i] = temp;
+			temp = arr[left];
+			arr[left] = arr[i];
+			arr[i] = temp;
 
 			callout permute (left+1, right, n);
 
-			temp = a[left];
-			a[left] = a[i];
-			a[i] = temp;
+			temp = arr[left];
+			arr[left] = arr[i];
+			arr[i] = temp;
 		}
 	}
 	else
