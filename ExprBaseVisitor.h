@@ -43,10 +43,6 @@ public:
     return visitChildren(ctx);
   }
 
-  virtual antlrcpp::Any visitFunccallStatement(ExprParser::FunccallStatementContext *ctx) override {
-    return visitChildren(ctx);
-  }
-
   virtual antlrcpp::Any visitAssignStatement(ExprParser::AssignStatementContext *ctx) override {
     return visitChildren(ctx);
   }
@@ -100,10 +96,6 @@ public:
   }
 
   virtual antlrcpp::Any visitAssignArrayExpr(ExprParser::AssignArrayExprContext *ctx) override {
-    return visitChildren(ctx);
-  }
-
-  virtual antlrcpp::Any visitCall(ExprParser::CallContext *ctx) override {
     return visitChildren(ctx);
   }
 

@@ -134,10 +134,10 @@ public:
     return node;
   }
 
-  virtual antlrcpp::Any visitFunccallStatement(ExprParser::FunccallStatementContext *ctx) override
-  {
-    return visit(ctx->call());
-  }
+  // virtual antlrcpp::Any visitFunccallStatement(ExprParser::FunccallStatementContext *ctx) override
+  // {
+  //   return visit(ctx->call());
+  // }
 
   virtual antlrcpp::Any visitAssignStatement(ExprParser::AssignStatementContext *ctx) override
   {
@@ -236,14 +236,14 @@ public:
     return visit(ctx->cont_stmnt());
   }
 
-  virtual antlrcpp::Any visitCall(ExprParser::CallContext *ctx) override
-  {
-    cout<<"In visitCall"<<'\n';
-    ASTFuncCallStatement *node = new ASTFuncCallStatement();
-    node->funcname = ctx->VAR_NAME()->getText();
-    node->params_list = visit(ctx->params_list());
-    return (ASTStat *)node;
-  }
+  // virtual antlrcpp::Any visitCall(ExprParser::CallContext *ctx) override
+  // {
+  //   cout<<"In visitCall"<<'\n';
+  //   ASTFuncCallStatement *node = new ASTFuncCallStatement();
+  //   node->funcname = ctx->VAR_NAME()->getText();
+  //   node->params_list = visit(ctx->params_list());
+  //   return (ASTStat *)node;
+  // }
 
   virtual antlrcpp::Any visitPrinter(ExprParser::PrinterContext *ctx) override
   {
@@ -526,11 +526,12 @@ public:
 
   virtual antlrcpp::Any visitPlusMinusExpr(ExprParser::PlusMinusExprContext *ctx) override
   {
-    ASTExpr* expr = new ASTExpr();
+    ASTPlusMinusExpr* node = new ASTPlusMinusExpr();
     cout<<"In visitPlusMinusExpr"<<'\n';
     cout<<"Operator: "<<ctx->ADDOP()->getText()<<'\n';
-    expr = visit(ctx->expr());
-    return expr;
+    node->op = ctx->ADDOP()->getText();
+    node->expr = visit(ctx->expr());
+    return (ASTExpr *)node;
   }
 
   virtual antlrcpp::Any visitArrayValExpr(ExprParser::ArrayValExprContext *ctx) override
@@ -564,9 +565,11 @@ public:
   virtual antlrcpp::Any visitFunc_call(ExprParser::Func_callContext *ctx) override
   {
     cout<<"In visitFunc_call"<<'\n';
-    cout<<"Function name: "<<ctx->VAR_NAME()->getText()<<'\n';
-    ASTParamsList *node = visit(ctx->params_list());
-    return (new ASTExpr());
+    ASTFuncCallExpr *node = new ASTFuncCallExpr();
+    node->varname = visit(ctx->identifier());
+    cout<<"Function name: "<<node->varname<<'\n';
+    node->params_list = visit(ctx->params_list());
+    return (ASTExpr*)node;
   }
 
   virtual antlrcpp::Any visitParenExpr(ExprParser::ParenExprContext *ctx) override
@@ -634,18 +637,20 @@ public:
 
   virtual antlrcpp::Any visitVarnameExpr(ExprParser::VarnameExprContext *ctx) override 
   {
-      ASTExprID* varname;
+      ASTVarnameExpr* node = new ASTVarnameExpr();
       cout<<"In visitVarnameExpr"<<'\n';
-      varname = visit(ctx->identifier());
+      node->varname = visit(ctx->identifier());
       //cout<<"Exiter varname"<<'\n';
-      return (ASTExpr*) varname;
+      return (ASTExpr*) node;
   }
 
   virtual antlrcpp::Any visitCharExpr(ExprParser::CharExprContext *ctx) override
   {
       cout<<"In visitCharExpr"<<'\n';
-      ASTExprID* node;
-      node = new ASTExprID(ctx->CHAR()->getText());
+      ASTCharExpr* node = new ASTCharExpr();
+      node->literal = ctx->CHAR()->getText();
+      cout<<"Char literal: "<<node->literal<<'\n';
+      cout<<"Exit  visitCharExpr"<<'\n';
       return (ASTExpr *)node;
   }
 
@@ -730,9 +735,11 @@ public:
   virtual antlrcpp::Any visitBoolExpr(ExprParser::BoolExprContext *ctx) override
   {
     cout<<"In visitBoolExpr"<<'\n';
+    ASTBoolExpr* node = new ASTBoolExpr();
     string op = ctx->BOOL->getText();
     cout<<"Boolean value: " + op<<'\n';
-    return (new ASTExpr());
+    node->value = op;
+    return (ASTExpr *)node;
   }
   virtual antlrcpp::Any visitRet(ExprParser::RetContext *ctx) override
   {

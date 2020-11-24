@@ -1,1 +1,23 @@
-int a;
+int a[][] = {1,1,3};
+int d;
+int i=d*d;
+function void f(int x, int y)
+{
+    d++;
+    i++;
+    d= i + i;
+    a[0][0];
+    return;
+}
+function int main()
+{
+    int x;
+    x = d*i;
+    d++;
+    if(i^x)
+    {
+        int p;
+        p++;
+    }
+    callout f(1,1);
+}

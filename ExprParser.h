@@ -26,12 +26,12 @@ public:
   enum {
     RuleProg = 0, RuleRoot = 1, RuleBlankdeclaration = 2, RuleGlobaldeclaration = 3, 
     RuleFunc_declaration = 4, RuleList_args = 5, RuleBlock = 6, RuleStatement = 7, 
-    RuleAssignment = 8, RuleCall = 9, RulePrinter = 10, RuleInput = 11, 
-    RuleInputargs = 12, RuleBreak_stmnt = 13, RuleCont_stmnt = 14, RuleWhile_loop = 15, 
-    RuleFor_loop = 16, RuleDeclaration = 17, RuleIf_else = 18, RuleElse_part = 19, 
-    RuleBlockOrStatement = 20, RuleIndividualDeclaration = 21, RuleVarassign = 22, 
-    RuleCondition = 23, RuleExpr = 24, RuleRet = 25, RuleArray_ref = 26, 
-    RuleParams_list = 27, RuleDatatype = 28, RuleIdentifier = 29, RuleCaller = 30
+    RuleAssignment = 8, RulePrinter = 9, RuleInput = 10, RuleInputargs = 11, 
+    RuleBreak_stmnt = 12, RuleCont_stmnt = 13, RuleWhile_loop = 14, RuleFor_loop = 15, 
+    RuleDeclaration = 16, RuleIf_else = 17, RuleElse_part = 18, RuleBlockOrStatement = 19, 
+    RuleIndividualDeclaration = 20, RuleVarassign = 21, RuleCondition = 22, 
+    RuleExpr = 23, RuleRet = 24, RuleArray_ref = 25, RuleParams_list = 26, 
+    RuleDatatype = 27, RuleIdentifier = 28, RuleCaller = 29
   };
 
   ExprParser(antlr4::TokenStream *input);
@@ -53,7 +53,6 @@ public:
   class BlockContext;
   class StatementContext;
   class AssignmentContext;
-  class CallContext;
   class PrinterContext;
   class InputContext;
   class InputargsContext;
@@ -312,15 +311,6 @@ public:
     virtual antlrcpp::Any accept(antlr4::tree::ParseTreeVisitor *visitor) override;
   };
 
-  class  FunccallStatementContext : public StatementContext {
-  public:
-    FunccallStatementContext(StatementContext *ctx);
-
-    CallContext *call();
-
-    virtual antlrcpp::Any accept(antlr4::tree::ParseTreeVisitor *visitor) override;
-  };
-
   StatementContext* statement();
 
   class  AssignmentContext : public antlr4::ParserRuleContext {
@@ -381,22 +371,6 @@ public:
   };
 
   AssignmentContext* assignment();
-
-  class  CallContext : public antlr4::ParserRuleContext {
-  public:
-    CallContext(antlr4::ParserRuleContext *parent, size_t invokingState);
-    virtual size_t getRuleIndex() const override;
-    CallerContext *caller();
-    antlr4::tree::TerminalNode *VAR_NAME();
-    Params_listContext *params_list();
-    antlr4::tree::TerminalNode *Semi();
-
-
-    virtual antlrcpp::Any accept(antlr4::tree::ParseTreeVisitor *visitor) override;
-   
-  };
-
-  CallContext* call();
 
   class  PrinterContext : public antlr4::ParserRuleContext {
   public:
@@ -884,7 +858,7 @@ public:
     Func_callContext(ExprContext *ctx);
 
     CallerContext *caller();
-    antlr4::tree::TerminalNode *VAR_NAME();
+    IdentifierContext *identifier();
     Params_listContext *params_list();
 
     virtual antlrcpp::Any accept(antlr4::tree::ParseTreeVisitor *visitor) override;

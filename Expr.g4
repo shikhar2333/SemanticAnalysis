@@ -18,8 +18,7 @@ list_args: LeftParen (datatype VAR_NAME (Comma datatype VAR_NAME)*)? RightParen;
 
 block: LeftCurly statement* RightCurly;
 
-statement: call		      # funccallStatement  
-		 | assignment     # assignStatement
+statement: assignment     # assignStatement
          | declaration 	  # declareStatement
          | ret         	  # returnStatement
 		 | expr Semi      # exprStatement         
@@ -36,8 +35,6 @@ assignment: identifier ASSIGN expr Semi								             # VarAssignment
     | identifier LeftSqr expr RightSqr LeftSqr expr RightSqr ASSIGN expr Semi	 # assign2DArrayExpr
 	| identifier LeftSqr expr RightSqr ASSIGN expr Semi                          # assignArrayExpr
 	;
-
-call : caller VAR_NAME params_list Semi;
 
 printer: 'print' LeftParen ((expr|STRING) (Comma (expr|STRING))*)? RightParen Semi;
 input: 'input' LeftParen inputargs RightParen Semi;
@@ -75,28 +72,28 @@ condition: LeftParen condition RightParen                                  # Par
     | expr (RELOP|BITWISE_OP|SHIFT_OP|EQOP|AND_OR) expr                    # RelopExpr		
     ;
 
-expr: identifier INC_DEC                                              # postIncDecExpr
+expr: identifier INC_DEC                                                # postIncDecExpr
 	| identifier LeftSqr expr RightSqr LeftSqr expr RightSqr INC_DEC	# postIncDec2DArr
 	| INC_DEC identifier LeftSqr expr RightSqr LeftSqr expr RightSqr	# preIncDec2DArr
-	| identifier LeftSqr expr RightSqr INC_DEC	                    # postIncDecArr 
-	| INC_DEC identifier LeftSqr expr RightSqr                        # preIncDecArr
-	| caller VAR_NAME params_list                                   # func_call
-	| ADDOP expr 	                                                # PlusMinusExpr
-    | INC_DEC identifier                                              # preIncDecExpr
-    | expr MODULO expr                                              # modExpr
-	| expr DIV expr                                                 # divExpr
-	| expr MULT expr                                                # multiplyExpr
-	| expr ADDOP expr                                               # addExpr
-	| expr EQOP expr                                                # eqaulExpr
-	| expr SHIFT_OP expr                                            # shiftOpExpr	  
-	| expr BITWISE_OP expr                                          # bitwiseOpExpr
-	| LeftParen expr RightParen	                                    # parenExpr
+	| identifier LeftSqr expr RightSqr INC_DEC	                        # postIncDecArr 
+	| INC_DEC identifier LeftSqr expr RightSqr                          # preIncDecArr
+	| caller identifier params_list                                       # func_call
+	| ADDOP expr 	                                                    # PlusMinusExpr
+    | INC_DEC identifier                                                # preIncDecExpr
+	| expr MODULO expr                                                  # modExpr
+	| expr DIV expr                                                     # divExpr
+	| expr MULT expr                                                    # multiplyExpr
+	| expr ADDOP expr                                                   # addExpr
+	| expr EQOP expr                                                    # eqaulExpr
+	| expr SHIFT_OP expr                                                # shiftOpExpr	  
+	| expr BITWISE_OP expr                                              # bitwiseOpExpr
+	| LeftParen expr RightParen	                                        # parenExpr
 	| identifier				                                        # varnameExpr
-	| INT_CONST				                                        # constIntExpr
-	| BOOL = ('true'|'false')										# boolExpr
-	| identifier LeftSqr expr RightSqr                                # ArrayValExpr
-	| identifier LeftSqr expr RightSqr LeftSqr expr RightSqr          # D2ArrayValExpr
-	| CHAR                                                          # charExpr
+	| INT_CONST				                                            # constIntExpr
+	| BOOL = ('true'|'false')										    # boolExpr
+	| identifier LeftSqr expr RightSqr                                  # ArrayValExpr
+	| identifier LeftSqr expr RightSqr LeftSqr expr RightSqr            # D2ArrayValExpr
+	| CHAR                                                              # charExpr
 	;
 
 ret: RETURN expr? Semi;

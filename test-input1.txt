@@ -2,10 +2,20 @@
 //int b = true;
 //int b;
 int arr[50];
+function void f(int c)
+{
+  int x = 1;
+  x++;
+}
 function int main(int x, int argc, int argv)
 {
     //int a[][] = {1,2,3};
-    arr[2] = 1;
+    int ar[2] = {1};
+    if(3 == 2)
+    {
+      int x;
+    }
+    callout f(1);
     //char c; 
     //a = 1;
     //int z;
@@ -35,4 +45,4 @@ function int main(int x, int argc, int argv)
     	//a = ++a;
     	//continue;
     // return;
-  }
+}

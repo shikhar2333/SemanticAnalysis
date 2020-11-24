@@ -29,7 +29,7 @@ function int permute (int left, int right, int n)
 }
 function int main()
 {
-	int i;
+	int i,n;
 	input(n);
 	for (i=1; i<=n; i=i+1)
 	{

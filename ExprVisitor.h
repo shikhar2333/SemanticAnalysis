@@ -33,8 +33,6 @@ public:
 
     virtual antlrcpp::Any visitBlock(ExprParser::BlockContext *context) = 0;
 
-    virtual antlrcpp::Any visitFunccallStatement(ExprParser::FunccallStatementContext *context) = 0;
-
     virtual antlrcpp::Any visitAssignStatement(ExprParser::AssignStatementContext *context) = 0;
 
     virtual antlrcpp::Any visitDeclareStatement(ExprParser::DeclareStatementContext *context) = 0;
@@ -62,8 +60,6 @@ public:
     virtual antlrcpp::Any visitAssign2DArrayExpr(ExprParser::Assign2DArrayExprContext *context) = 0;
 
     virtual antlrcpp::Any visitAssignArrayExpr(ExprParser::AssignArrayExprContext *context) = 0;
-
-    virtual antlrcpp::Any visitCall(ExprParser::CallContext *context) = 0;
 
     virtual antlrcpp::Any visitPrinter(ExprParser::PrinterContext *context) = 0;
 

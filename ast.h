@@ -52,7 +52,6 @@ class ASTPostIncDec2DArr;
 class ASTPreIncDecExpr;
 class ASTPreIncDecArr;
 class ASTPreIncDec2DArr;
-class ASTFuncCallStatement;
 class ASTParamsList;
 class ASTWriteStatement;
 class ASTReadStatement;
@@ -67,6 +66,11 @@ class ASTArrayAssignment;
 class ASTD2ArrayAssignment;
 class ASTArrayRef;
 class ASTBlank;
+class ASTPlusMinusExpr;
+class ASTVarnameExpr;
+class ASTBoolExpr;
+class ASTCharExpr;
+class ASTFuncCallExpr;
 
 class ASTvisitor
 {
@@ -112,7 +116,6 @@ public:
     virtual void visit(ASTPreIncDecExpr &node) = 0;
     virtual void visit(ASTPreIncDecArr &node) = 0;
     virtual void visit(ASTPreIncDec2DArr &node) = 0;
-    virtual void visit(ASTFuncCallStatement &node) = 0;
     virtual void visit(ASTParamsList &node) = 0;
     virtual void visit(ASTWriteStatement &node) = 0;
     virtual void visit(ASTReadStatement &node) = 0;
@@ -127,6 +130,11 @@ public:
     virtual void visit(ASTD2ArrayAssignment &node) = 0;
     virtual void visit(ASTArrayRef &node) = 0;
     virtual void visit(ASTBlank &node) = 0;
+    virtual void visit(ASTPlusMinusExpr &node) = 0;
+    virtual void visit(ASTVarnameExpr &node) = 0;
+    virtual void visit(ASTBoolExpr &node) = 0;
+    virtual void visit(ASTCharExpr &node) = 0;
+    virtual void visit(ASTFuncCallExpr &node) = 0;
 
     virtual void visit(ASTExprBinary &node) = 0;
     virtual void visit(ASTExprTernary &node) = 0;
@@ -202,6 +210,10 @@ class ASTVarDecl : public ASTIndividualDecl
         {
             v.visit(*this);
         }
+        std::string GetVarName()
+        {
+            return varname;
+        }
 };
 
 class ASTArrayRef : public ASTnode
@@ -223,6 +235,10 @@ class ASTArrayDeclaration : public ASTIndividualDecl
         {
             v.visit(*this);
         }
+        std::string GetVarName()
+        {
+            return varname;
+        }
 };
 
 class ASTD2ArrayDeclaration : public ASTIndividualDecl
@@ -234,6 +250,10 @@ class ASTD2ArrayDeclaration : public ASTIndividualDecl
         {
             v.visit(*this);
         }
+        std::string GetVarName()
+        {
+            return varname;
+        }
 };
 
 class ASTArrayAssignment : public ASTIndividualDecl
@@ -244,6 +264,10 @@ class ASTArrayAssignment : public ASTIndividualDecl
         {
             v.visit(*this);
         }
+        std::string GetVarName()
+        {
+            return varname;
+        }
 };
 
 class ASTD2ArrayAssignment : public ASTIndividualDecl
@@ -253,6 +277,10 @@ class ASTD2ArrayAssignment : public ASTIndividualDecl
         virtual void accept(ASTvisitor &v)
         {
             v.visit(*this);
+        }
+        std::string GetVarName()
+        {
+            return varname;
         }
 };
 
@@ -330,16 +358,6 @@ class ASTParamsList : public ASTnode
 {
     public:
         std::vector<ASTExpr*> ExprList;
-        virtual void accept(ASTvisitor &v)
-        {
-            v.visit(*this);
-        }
-};
-class ASTFuncCallStatement : public ASTStat
-{
-    public:
-        std::string funcname;
-        ASTParamsList *params_list;
         virtual void accept(ASTvisitor &v)
         {
             v.visit(*this);
@@ -518,6 +536,7 @@ class ASTGlobalDecl : public ASTRoot
 class ASTExpr : public ASTnode
 {
 public:
+    std::string type;
     virtual void accept(ASTvisitor &v)
     {
         v.visit(*this);
@@ -625,6 +644,16 @@ class ASTParenExpr : public ASTExpr
 {
     public:
         ASTExpr* expr;
+        virtual void accept(ASTvisitor &v)
+        {
+            v.visit(*this);
+        }
+};
+class ASTPlusMinusExpr : public ASTExpr
+{
+    public:
+        ASTExpr* expr;
+        std::string op;
         virtual void accept(ASTvisitor &v)
         {
             v.visit(*this);
@@ -755,33 +784,6 @@ public:
         v.visit(*this);
     }
 };
-class ASTPlusMinusExpr : public ASTExpr
-{
-    std::string bin_operator;
-    ASTExpr *right;
-
-public:
-    // Constructor to initialize binary operator,
-    // lhs and rhs of the binary expression.
-    ASTPlusMinusExpr(std::string op, ASTExpr *_right) :bin_operator(op), right(_right) {}
-
-    /*  virtual void printPostFix() const 
-     {
-     	lhs->printPostFix();
-     	rhs->printPostFix();
-     	std::cout << bin_operator << " "; 
-     } */
-
-    ASTExpr *getRight()
-    {
-        return right;
-    }
-
-    virtual void accept(ASTvisitor &v)
-    {
-        v.visit(*this);
-    }
-};
 
 class ASTExprTernary : public ASTExpr
 {
@@ -848,10 +850,8 @@ public:
 
 class ASTExprID : public ASTExpr
 {
-
-    string id;
-
 public:
+    string id;
     ASTExprID(string id) : id(id) {}
 
     string getID()
@@ -885,4 +885,42 @@ public:
     {
         delete root;
     }
+};
+
+class ASTVarnameExpr : public ASTExpr
+{
+    public:
+        ASTExprID* varname;
+        virtual void accept(ASTvisitor &v)
+        {
+            v.visit(*this);
+        }
+};
+class ASTBoolExpr : public ASTExpr
+{
+    public:
+        std::string value;
+        virtual void accept(ASTvisitor &v)
+        {
+            v.visit(*this);
+        }
+};
+class ASTCharExpr : public ASTExpr
+{
+    public:
+        std::string literal;
+        virtual void accept(ASTvisitor &v)
+        {
+            v.visit(*this);
+        }
+};
+class ASTFuncCallExpr : public ASTExpr
+{
+    public:
+        ASTExprID* varname;
+        ASTParamsList *params_list;
+        virtual void accept(ASTvisitor &v)
+        {
+            v.visit(*this);
+        }
 };

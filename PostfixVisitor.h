@@ -1,6 +1,5 @@
 //#include "ast.h"
 #include <iostream>
-#include <vector>
 using namespace std;
 struct Variable
 {
@@ -8,15 +7,60 @@ struct Variable
     std::string varname;
 };
 typedef struct Variable Variable;
-std::vector< std::vector<Variable> > SymbolTable;
+
+class Scope
+{
+    public:
+        map<std::string, std::string> scp;
+        void AddScope(std::string name, std::string datatype)
+        {
+            scp[name] = datatype;
+        }
+        bool FindScope(std::string name)
+        {
+            if(scp.find(name) == scp.end())
+                return false;
+            return true;
+        }
+        string getType(std::string name)
+        {
+            return scp[name];
+        }
+};
+std::vector<Scope> SymbolTable;
+string GetVarType(std::string name)
+{
+    int last = SymbolTable.size() - 1;
+    string type = "";
+    for(int i = last; i>=0; i--)
+    {
+        if( SymbolTable[i].FindScope(name))
+        {
+            type = SymbolTable[i].getType(name);
+        }  
+    }
+    return type;
+}
 std::vector<Variable> Func_Args;
+map<std::string, std::string> FuncNames;
+map< std::string, std::vector<string> > FuncList;
+bool check_func(std::string funcname)
+{
+    if(FuncNames.find(funcname) != FuncNames.end())
+        return true;
+    return false;
+}
+
 class PostFixVisitor : public ASTvisitor
 {
 public:
     void visit(ASTProg &node)
     {
         cout << "PostFixVisit traversal invoked" << endl;
+        Scope scope;
+        SymbolTable.push_back(scope);
         node.root->accept(*this);
+        SymbolTable.pop_back();
     }
     void visit(ASTRoot &node)override{}
     void visit(ASTFuncDec &node)
@@ -26,35 +70,33 @@ public:
         for (auto func : node.FuncDecList)
         {
             cout << "Function #" <<i<<'\n';
-            // SymbolTable.push_back(vector<Variable>());
-            func->accept(*this);
+            func->accept(*this);            
+            while(!Func_Args.empty())
+            {
+                Func_Args.pop_back();
+            }
             i = i + 1;
         }
-        while(!Func_Args.empty())
-        {
-            Func_Args.pop_back();
-        }
+        //cout<<"Exit ASTFuncDec"<<'\n';
     }
     void visit(ASTGlobalDecl &node)
     {
         cout<<"In ASTGlobalDecl"<<'\n';
         cout<<"Global Datatype: "<<node.datatype<<'\n';
-        int i=1;
-        SymbolTable.push_back(vector<Variable>());
-        Variable x;
-        x.datatype.assign(node.datatype);
-        x.varname.assign(node.datatype);
+        int i = 1;
+
         int last = SymbolTable.size() - 1;
+
         for(auto decl: node.DeclStatementList)
         {
             cout<<"GlobalDeclaration #"<<i<<'\n';
-            SymbolTable[last].push_back(x);
+            SymbolTable[last].AddScope( (*decl).varname, node.datatype);
             decl->accept(*this);
+            //cout<<SymbolTable[last].FindScope((*decl).varname)<<'\n';
             i++;
         }
         if(node.root)
             node.root->accept(*this);
-        SymbolTable.pop_back();
     }
     void visit(ASTBlank &node)
     {
@@ -63,9 +105,22 @@ public:
     void visit(ASTListFuncDec &node)
     {
         cout<<"In ASTListFuncDec"<<'\n';
+        bool found = check_func(node.funcname);
+        if(found)
+        {
+            cout<<"Function Redeclaration Error"<<'\n';
+            exit(0);
+        }
         cout<<"Function Name: "<<node.funcname<<'\n';
+        FuncNames[node.funcname] = node.datatype;
         node.params_list->accept(*this);
+        int size = Func_Args.size();
+        string t[size];
+        for(int i=0; i<size; i++)
+            t[i] = Func_Args[i].datatype;
+        FuncList[node.funcname] = std::vector<string>(t, t + size);
         node.block->accept(*this);
+        //cout<<"Exit ASTListFuncDec"<<'\n';
     }
     void visit(ASTParamsList &node)
     {
@@ -82,10 +137,11 @@ public:
     {
         cout<<"In ASTBlock"<<'\n';
         int i = 1;
-        SymbolTable.push_back(vector<Variable>());
+        Scope scope;
+        SymbolTable.push_back(scope);
         int last = SymbolTable.size() - 1;
         for(auto func_args: Func_Args)
-            SymbolTable[last].push_back(func_args);
+            SymbolTable[last].AddScope(func_args.varname, func_args.datatype);
         for (auto stat : node.statementList)
         {
             cout << "Statement #" <<i<<'\n';
@@ -94,19 +150,17 @@ public:
             i = i + 1;
         }
         SymbolTable.pop_back();
+        //cout<<"Exit ASTBlock"<<'\n';
     }
     void visit(ASTDeclStatement &node)
     {
         cout<<"In ASTDeclStatement"<<'\n';
         int i = 1;
         int last = SymbolTable.size() - 1;
-        Variable x;
-        x.datatype.assign(node.datatype);
-        x.varname.assign(node.datatype);
         for(auto decl : node.DeclStatementList)
         {
             cout<<"Declaration #"<<i<<'\n';
-            SymbolTable[last].push_back(x);
+            SymbolTable[last].AddScope((*decl).varname, node.datatype);
             decl->accept(*this);
             i = i + 1;
         }
@@ -115,56 +169,86 @@ public:
     void visit(ASTVarDecl &node)
     {
         cout<<"In ASTVarDecl"<<'\n';
-        int last = SymbolTable.size() - 1;
-        int scope_last = SymbolTable[last].size() - 1;
-        SymbolTable[last][scope_last].varname.assign(node.varname);
-        // for(int i=0; i<SymbolTable.size(); i++)
-        // {
-        //     //cout<<i<<'\n';
-        //     for(int j=0; j<SymbolTable[i].size(); j++)
-        //     {
-        //         cout<<SymbolTable[i][j].varname<<" "<<SymbolTable[i][j].datatype<<" ";
-        //     }
-        //     cout<<'\n';
-        // }
         if(node.expr)
+        {
             node.expr->accept(*this);
+            string type = GetVarType(node.varname);
+            cout<<node.expr->type<<'\n';
+            if( type != node.expr->type )
+            {
+                cout<<"Type mismatch on Left Hand Side and Right Hand Side"<<'\n';
+                exit(0);
+            }
+        }
     }
     void visit(ASTArrayDeclaration &node)
     {
         cout<<"In ASTArrayDeclaration"<<'\n';
         if(node.array_ref)
+        {
             node.array_ref->accept(*this);
-        
-        int last = SymbolTable.size() - 1;
-        int scope_last = SymbolTable[last].size() - 1;
-        SymbolTable[last][scope_last].varname.assign(node.varname);
+            ASTArrayRef* ExprList = node.array_ref;
+            string type = GetVarType(node.varname);
+            for(auto expr: ExprList->expr)
+            {
+                if( type != expr->type)
+                {
+                    cout<<"Type mismatch on Left Hand Side and Right Hand Side"<<'\n';
+                    exit(0);
+                }
+            }
+        }
     }
     void visit(ASTD2ArrayDeclaration &node)
     {
         cout<<"In ASTD2ArrayDeclaration"<<'\n';
         if(node.array_ref)
+        {
             node.array_ref->accept(*this);
-        
-        int last = SymbolTable.size() - 1;
-        int scope_last = SymbolTable[last].size() - 1;
-        SymbolTable[last][scope_last].varname.assign(node.varname);
+            ASTArrayRef* ExprList = node.array_ref;
+            string type = GetVarType(node.varname);
+            cout<<type<<'\n';
+            for(auto expr: ExprList->expr)
+            {
+                if( type != expr->type)
+                {
+                    cout<<"Type mismatch on Left Hand Side and Right Hand Side"<<'\n';
+                    exit(0);
+                }
+            }
+        }
     }
     void visit(ASTArrayAssignment &node)
     {
         cout<<"In ASTArrayAssignment"<<'\n';
         node.array_ref->accept(*this);
-        int last = SymbolTable.size() - 1;
-        int scope_last = SymbolTable[last].size() - 1;
-        SymbolTable[last][scope_last].varname.assign(node.varname);
+        ASTArrayRef* ExprList = node.array_ref;
+        string type = GetVarType(node.varname);
+        cout<<type<<'\n';
+        for(auto expr: ExprList->expr)
+        {
+            if( type != expr->type)
+            {
+                cout<<"Type mismatch on Left Hand Side and Right Hand Side"<<'\n';
+                exit(0);
+            }
+        }
     }
     void visit(ASTD2ArrayAssignment &node)
     {
         cout<<"In ASTD2ArrayAssignment"<<'\n';
         node.array_ref->accept(*this);
-        int last = SymbolTable.size() - 1;
-        int scope_last = SymbolTable[last].size() - 1;
-        SymbolTable[last][scope_last].varname.assign(node.varname);
+        ASTArrayRef* ExprList = node.array_ref;
+        string type = GetVarType(node.varname);
+        cout<<type<<'\n';
+        for(auto expr: ExprList->expr)
+        {
+            if( type != expr->type)
+            {
+                cout<<"Type mismatch on Left Hand Side and Right Hand Side"<<'\n';
+                exit(0);
+            }
+        }
     }
     void visit(ASTArrayRef &node)
     {
@@ -221,18 +305,12 @@ public:
         node.expr1->accept(*this);
         node.expr2->accept(*this);
     }
-
-    void visit(ASTFuncCallStatement &node)
-    {
-        cout<<"In ASTFuncCallStatement"<<'\n';
-        cout<<"Function Called: "<<node.funcname<<'\n';
-        node.params_list->accept(*this);
-    }
     void visit(ASTReturn &node)
     {
         cout<<"In ASTReturn"<<'\n';
         if(node.expr)
             node.expr->accept(*this);
+        //cout<<"Exit"<<'\n';
     }
     void visit(ASTWhile &node)
     {
@@ -254,12 +332,14 @@ public:
     void visit(ASTPostIncDecExpr &node)
     {
         node.varname->accept(*this);
+        node.type = GetVarType(node.varname->id);
         cout<<"In ASTPostIncDecExpr"<<'\n';
     }
     void visit(ASTPostIncDec2DArr &node)
     {
         cout<<"In ASTPostIncDec2DArr"<<'\n';
         node.varname->accept(*this);
+        node.type = GetVarType(node.varname->id);
         node.expr1->accept(*this);
         node.expr2->accept(*this);
     }
@@ -267,6 +347,7 @@ public:
     {
         cout<<"In ASTPreIncDec2DArr"<<'\n';
         node.varname->accept(*this);
+        node.type = GetVarType(node.varname->id);
         node.expr1->accept(*this);
         node.expr2->accept(*this);
     }
@@ -274,34 +355,100 @@ public:
     {
         cout<<"In ASTPostIncDecArr"<<'\n';
         node.varname->accept(*this);
+        node.type = GetVarType(node.varname->id);
         node.expr->accept(*this);
     }
     void visit(ASTPreIncDecArr &node)
     {
         cout<<"In ASTPreIncDecArr"<<'\n';
         node.varname->accept(*this);
+        node.type = GetVarType(node.varname->id);
         node.expr->accept(*this);
+    }
+    void visit(ASTFuncCallExpr &node)
+    {
+        cout<<"In ASTFuncCallExpr"<<'\n';
+        node.varname->accept(*this);
+        node.type = FuncNames[node.varname->id];
+        cout<<"Function Called: "<<node.varname->id<<'\n';
+        if(!check_func(node.varname->id))
+        {
+            cout<<"Function Called without any Declaration"<<'\n';
+            exit(0);
+        }
+        node.params_list->accept(*this);
+        int i = 0;
+        int size = FuncList[node.varname->id].size();
+        int call_size = node.params_list->ExprList.size();
+        if(size != call_size)
+        {
+            cout<<node.varname->id<<" "<<call_size<<'\n';
+            cout<<"Unexpected Number Of Parameters in Function Call"<<'\n';
+            exit(0);
+        }
+        for(auto params: node.params_list->ExprList)
+        {
+            if(params->type != FuncList[node.varname->id][i])
+            {
+                cout<<"Type of Function Parameter doesn't match with the function signature"<<'\n';
+                exit(0);
+            }
+            i++;
+        }
+    }
+    void visit(ASTPlusMinusExpr &node)
+    {
+        cout<<"In ASTPlusMinusExpr: "<<node.op<<'\n';
+        node.expr->accept(*this);
+        int last = SymbolTable.size() - 1;
+        node.type = node.expr->type;
     }
     void visit(ASTPreIncDecExpr &node)
     {
         cout<<"In ASTPreIncDecExpr"<<'\n';
         node.varname->accept(*this);
+        node.type = GetVarType(node.varname->id);
     }
     void visit(ASTParenExpr &node)
     {
         cout<<"In ASTParenExpr"<<'\n';
         node.expr->accept(*this);
+        int last = SymbolTable.size() - 1;
+        node.type = node.expr->type;
+    }
+    void visit(ASTVarnameExpr &node)
+    {
+        cout<<"In ASTVarnameExpr"<<'\n';
+        node.varname->accept(*this);
+        node.type = GetVarType(node.varname->id);
+    }
+    void visit(ASTExprINT &node)
+    {
+        cout << "Integer: " << node.getIntLit()<<'\n';
+        node.type = "int";
+    }
+    void visit(ASTBoolExpr &node)
+    {
+        cout<<"In ASTBoolExpr: "<<node.value<<'\n';
+        node.type = "bool";
+    }
+    void visit(ASTCharExpr &node)
+    {
+        cout<<"In ASTCharExpr"<<'\n';
+        node.type = "char";
     }
     void visit(ASTArrayValExpr &node)
     {
         cout<<"In ASTArrayValExpr"<<'\n';
         node.varname->accept(*this);
+        node.type = GetVarType(node.varname->id);
         node.expr->accept(*this);
     }
     void visit(ASTD2ArrayValExpr &node)
     {
         cout<<"In ASTD2ArrayValExpr"<<'\n';
         node.varname->accept(*this);
+        node.type = GetVarType(node.varname->id);
         node.expr1->accept(*this);
         node.expr2->accept(*this);
     }
@@ -313,6 +460,13 @@ public:
 
         left->accept(*this);
         right->accept(*this);
+        if(left->type != right->type)
+        {
+            cout<<left->type<<" "<<right->type<<'\n';
+            cout<<"Left Expr and Right Expr type don't match"<<'\n';
+            exit(0);
+        }
+        node.type = left->type;
         cout << " " + node.getBin_operator()<<'\n';
     }
 
@@ -334,26 +488,20 @@ public:
 
     void visit(ASTExprID &node)
     {
-        //cout<<node.getID()<<" ";
+        cout<<"Variable Name: "<<node.getID()<<" "<<'\n';
         std::string id = node.getID();
-        for(vector<vector<Variable>>::reverse_iterator rev_itr = SymbolTable.rbegin(); rev_itr!=SymbolTable.rend(); rev_itr++)
+        for(int i = SymbolTable.size() - 1; i>=0; i-- )
         {
-            for(auto &var: *rev_itr)
+            if( SymbolTable[i].FindScope(id) )
             {
-                cout<<var.varname<<" ";
-                if(var.varname == id)
-                {
-                    return;
-                }
+                return;
             }
-            cout<<'\n';
         }
+        //cout<<FuncNames[id]<<'\n';
+        if(check_func(id))
+            return;
         cout<<"Variable is being used before declaration"<<'\n';
         exit(0);
-    }
-    void visit(ASTExprINT &node)
-    {
-        cout << "Integer: " << node.getIntLit()<<'\n';
     }
     void visit(ASTListArgs &node)
     {
